@@ -41,4 +41,24 @@ class FriendRequestController extends AbstractController
         $manager->flush();
         return $this->json("Friend add",200);
     }
+    #[Route('/api/friendrequest/deny/{id}', methods: ['POST'])]
+    public function deny($id, FriendRequestRepository $repo, EntityManagerInterface $manager): Response
+    {
+        $request = $repo->find($id);
+        if ($request->getStatus() == 1){
+            return $this->json("this request was already accept");
+        }
+        $request->setStatus(2);
+        $sender = $request->getFromUser();
+        $sender->removeSentFriendRequest($request);
+        $recipient = $request->getToUser();
+        $recipient->removeReceivedFriendRequest($request);
+        $manager->persist($sender);
+        $manager->persist($recipient);
+        $manager->persist($request);
+        $manager->flush();
+        return $this->json("Request denied", 200);
+    }
+
+
 }

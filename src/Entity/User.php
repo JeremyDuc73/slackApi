@@ -17,11 +17,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
+    #[Groups(['friends:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read'])]
+    #[Groups(['friends:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -34,7 +34,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\OneToOne(mappedBy: 'ofUser', cascade: ['persist', 'remove'])]
-    #[Groups(['profile:read'])]
     private ?Profile $profile = null;
 
     public function getId(): ?int

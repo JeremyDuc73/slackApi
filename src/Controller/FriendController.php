@@ -12,6 +12,7 @@ class FriendController extends AbstractController
     #[Route('/api/friends', methods: ['GET'])]
     public function list(): Response
     {
-        return $this->json($this->getUser()->getProfile()->getRelationsAsSender(), 200, [], ['groups'=>'user:read']);
+        $test = $this->getUser()->getProfile()->getFriendsList();
+        return $this->json($test, 200, [], ['groups'=>'friends:read']);
     }
 }
