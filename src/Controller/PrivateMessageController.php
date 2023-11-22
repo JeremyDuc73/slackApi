@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class PrivateMessageController extends AbstractController
 {
-    #[Route('/api/privatconv/{id}/send')]
+    #[Route('/api/privatconv/{id}/send', name: 'app_privatemessage_send', methods: 'POST')]
     public function send($id,PrivateConversationRepository $repo, SerializerInterface $serializer, Request $request, EntityManagerInterface $manager): Response
     {
         $privateConversation = $repo->find($id);

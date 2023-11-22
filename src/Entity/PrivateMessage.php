@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: PrivateMessageRepository::class)]
 class PrivateMessage
 {
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

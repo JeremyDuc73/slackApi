@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PrivateConversationController extends AbstractController
 {
-    #[Route('/api/privateconv/create/{id}')]
+    #[Route('/api/privateconv/create/{id}', methods: 'POST')]
     public function create($id, ProfileRepository $repo, EntityManagerInterface $manager): Response
     {
         $creator = $this->getUser()->getProfile();
