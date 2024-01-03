@@ -14,7 +14,7 @@ class Profile
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all'])]
+    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -27,7 +27,7 @@ class Profile
 
     #[ORM\OneToOne(inversedBy: 'profile', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all'])]
+    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read'])]
     private ?User $ofUser = null;
 
     #[ORM\OneToMany(mappedBy: 'toUser', targetEntity: FriendRequest::class)]
@@ -59,6 +59,9 @@ class Profile
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: GroupMessage::class)]
     private Collection $groupMessages;
+
+    #[ORM\Column(length: 255)]
+    private ?string $displayName = null;
 
 
     public function __construct()
@@ -437,6 +440,18 @@ class Profile
                 $groupMessage->setAuthor(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(string $displayName): static
+    {
+        $this->displayName = $displayName;
 
         return $this;
     }

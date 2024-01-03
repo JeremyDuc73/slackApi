@@ -1,0 +1,12 @@
+liip_imagine:
+    driver: "gd"
+    resolvers:
+        default:
+            web_path: ~
+
+    filter_sets:
+        cache: ~
+        vignette:
+            quality: 75
+            filters:
+                thumbnail: { size: [ 120, 90 ], mode: outbound, position: center }

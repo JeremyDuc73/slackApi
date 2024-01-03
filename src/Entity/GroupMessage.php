@@ -28,6 +28,9 @@ class GroupMessage
     #[Groups(['groupmessage:read-one', 'groupmessage:read-all'])]
     private ?Profile $author = null;
 
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -65,6 +68,18 @@ class GroupMessage
     public function setAuthor(?Profile $author): static
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

@@ -25,6 +25,7 @@ class GroupMessageController extends AbstractController
         }
         $groupMessage = $serializer->deserialize($request->getContent(), GroupMessage::class, 'json');
         $groupMessage->setGroupConversation($groupConversation);
+        $groupMessage->setCreatedAt(new \DateTimeImmutable());
         $groupMessage->setAuthor($this->getUser()->getProfile());
         $manager->persist($groupMessage);
         $manager->flush();

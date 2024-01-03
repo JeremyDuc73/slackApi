@@ -21,7 +21,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all'])]
+    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read'])]
     private ?string $email = null;
 
     #[ORM\Column]
