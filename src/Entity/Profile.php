@@ -60,7 +60,7 @@ class Profile
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: GroupMessage::class)]
     private Collection $groupMessages;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $displayName = null;
 
 
