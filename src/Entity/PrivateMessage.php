@@ -16,15 +16,16 @@ class PrivateMessage
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['privconv:read', 'privmessage:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups('privmessage:read')]
+    #[Groups(['privmessage:read', 'privconv: read'])]
     private ?string $content = null;
 
     #[ORM\ManyToOne(inversedBy: 'privateMessages')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups('privmessage:read')]
+    #[Groups(['privmessage:read', 'privconv:read'])]
     private ?Profile $author = null;
 
     #[ORM\Column]

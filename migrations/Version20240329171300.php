@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20231122143207 extends AbstractMigration
+final class Version20240329171300 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -23,6 +23,7 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('CREATE SEQUENCE friend_request_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE group_conversation_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE group_message_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
+        $this->addSql('CREATE SEQUENCE image_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE private_conversation_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE private_message_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
         $this->addSql('CREATE SEQUENCE profile_id_seq INCREMENT BY 1 MINVALUE 1 START 1');
@@ -38,9 +39,13 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('CREATE TABLE group_recipient_conv_profile (group_conversation_id INT NOT NULL, profile_id INT NOT NULL, PRIMARY KEY(group_conversation_id, profile_id))');
         $this->addSql('CREATE INDEX IDX_E882A37AB73F9E4F ON group_recipient_conv_profile (group_conversation_id)');
         $this->addSql('CREATE INDEX IDX_E882A37ACCFA12B8 ON group_recipient_conv_profile (profile_id)');
-        $this->addSql('CREATE TABLE group_message (id INT NOT NULL, group_conversation_id INT NOT NULL, author_id INT NOT NULL, content VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE group_message (id INT NOT NULL, group_conversation_id INT NOT NULL, author_id INT NOT NULL, content VARCHAR(255) NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_30BD6473B73F9E4F ON group_message (group_conversation_id)');
         $this->addSql('CREATE INDEX IDX_30BD6473F675F31B ON group_message (author_id)');
+        $this->addSql('COMMENT ON COLUMN group_message.created_at IS \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('CREATE TABLE image (id INT NOT NULL, private_message_id INT DEFAULT NULL, image_name VARCHAR(255) DEFAULT NULL, image_size INT DEFAULT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE INDEX IDX_C53D045F5EBFB95E ON image (private_message_id)');
+        $this->addSql('COMMENT ON COLUMN image.updated_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE private_conversation (id INT NOT NULL, creator_id INT NOT NULL, member_id INT NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_DCF38EEB61220EA6 ON private_conversation (creator_id)');
         $this->addSql('CREATE INDEX IDX_DCF38EEB7597D3FE ON private_conversation (member_id)');
@@ -49,7 +54,7 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_4744FC9BF675F31B ON private_message (author_id)');
         $this->addSql('CREATE INDEX IDX_4744FC9B9AC0396 ON private_message (conversation_id)');
         $this->addSql('COMMENT ON COLUMN private_message.created_at IS \'(DC2Type:datetime_immutable)\'');
-        $this->addSql('CREATE TABLE profile (id INT NOT NULL, of_user_id INT NOT NULL, username VARCHAR(255) DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE profile (id INT NOT NULL, of_user_id INT NOT NULL, username VARCHAR(255) DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, display_name VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_8157AA0F5A1B2224 ON profile (of_user_id)');
         $this->addSql('COMMENT ON COLUMN profile.created_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE relation (id INT NOT NULL, sender_id INT NOT NULL, recipient_id INT NOT NULL, PRIMARY KEY(id))');
@@ -61,6 +66,9 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_75EA56E0FB7336F0 ON messenger_messages (queue_name)');
         $this->addSql('CREATE INDEX IDX_75EA56E0E3BD61CE ON messenger_messages (available_at)');
         $this->addSql('CREATE INDEX IDX_75EA56E016BA31DB ON messenger_messages (delivered_at)');
+        $this->addSql('COMMENT ON COLUMN messenger_messages.created_at IS \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('COMMENT ON COLUMN messenger_messages.available_at IS \'(DC2Type:datetime_immutable)\'');
+        $this->addSql('COMMENT ON COLUMN messenger_messages.delivered_at IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE OR REPLACE FUNCTION notify_messenger_messages() RETURNS TRIGGER AS $$
             BEGIN
                 PERFORM pg_notify(\'messenger_messages\', NEW.queue_name::text);
@@ -77,6 +85,7 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('ALTER TABLE group_recipient_conv_profile ADD CONSTRAINT FK_E882A37ACCFA12B8 FOREIGN KEY (profile_id) REFERENCES profile (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE group_message ADD CONSTRAINT FK_30BD6473B73F9E4F FOREIGN KEY (group_conversation_id) REFERENCES group_conversation (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE group_message ADD CONSTRAINT FK_30BD6473F675F31B FOREIGN KEY (author_id) REFERENCES profile (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE image ADD CONSTRAINT FK_C53D045F5EBFB95E FOREIGN KEY (private_message_id) REFERENCES private_message (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE private_conversation ADD CONSTRAINT FK_DCF38EEB61220EA6 FOREIGN KEY (creator_id) REFERENCES profile (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE private_conversation ADD CONSTRAINT FK_DCF38EEB7597D3FE FOREIGN KEY (member_id) REFERENCES profile (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('ALTER TABLE private_message ADD CONSTRAINT FK_4744FC9BF675F31B FOREIGN KEY (author_id) REFERENCES profile (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
@@ -93,6 +102,7 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('DROP SEQUENCE friend_request_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE group_conversation_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE group_message_id_seq CASCADE');
+        $this->addSql('DROP SEQUENCE image_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE private_conversation_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE private_message_id_seq CASCADE');
         $this->addSql('DROP SEQUENCE profile_id_seq CASCADE');
@@ -106,6 +116,7 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('ALTER TABLE group_recipient_conv_profile DROP CONSTRAINT FK_E882A37ACCFA12B8');
         $this->addSql('ALTER TABLE group_message DROP CONSTRAINT FK_30BD6473B73F9E4F');
         $this->addSql('ALTER TABLE group_message DROP CONSTRAINT FK_30BD6473F675F31B');
+        $this->addSql('ALTER TABLE image DROP CONSTRAINT FK_C53D045F5EBFB95E');
         $this->addSql('ALTER TABLE private_conversation DROP CONSTRAINT FK_DCF38EEB61220EA6');
         $this->addSql('ALTER TABLE private_conversation DROP CONSTRAINT FK_DCF38EEB7597D3FE');
         $this->addSql('ALTER TABLE private_message DROP CONSTRAINT FK_4744FC9BF675F31B');
@@ -118,6 +129,7 @@ final class Version20231122143207 extends AbstractMigration
         $this->addSql('DROP TABLE group_conversation_profile');
         $this->addSql('DROP TABLE group_recipient_conv_profile');
         $this->addSql('DROP TABLE group_message');
+        $this->addSql('DROP TABLE image');
         $this->addSql('DROP TABLE private_conversation');
         $this->addSql('DROP TABLE private_message');
         $this->addSql('DROP TABLE profile');

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\FriendRequestRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: FriendRequestRepository::class)]
 class FriendRequest
@@ -11,17 +12,21 @@ class FriendRequest
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['friendrequest:received', 'friendrequest:sent'])]
     private ?int $id = null;
-
-    #[ORM\ManyToOne(inversedBy: 'sentFriendRequests')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Profile $toUser = null;
 
     #[ORM\ManyToOne(inversedBy: 'receivedFriendRequests')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['friendrequest:sent'])]
+    private ?Profile $toUser = null;
+
+    #[ORM\ManyToOne(inversedBy: 'sentFriendRequests')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['friendrequest:received'])]
     private ?Profile $fromUser = null;
 
     #[ORM\Column]
+    #[Groups(['friendrequest:sent', 'friendrequest:received'])]
     private ?int $status = null;
 
     public function getId(): ?int

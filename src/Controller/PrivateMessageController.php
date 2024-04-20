@@ -15,10 +15,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[Route('/api/privconv/message')]
+#[Route('/api/privconv')]
 class PrivateMessageController extends AbstractController
 {
-    #[Route('/{id}/send', name: 'app_privatemessage_send', methods: 'POST')]
+    #[Route('/{id}/message/send', name: 'app_privatemessage_send', methods: 'POST')]
     public function send($id,PrivateConversationRepository $repo, SerializerInterface $serializer, Request $request,
                          EntityManagerInterface $manager, ImageProcessor $imageProcessor): Response
     {
@@ -28,14 +28,6 @@ class PrivateMessageController extends AbstractController
         $privateMessage->setConversation($privateConversation);
         $privateMessage->setAuthor($this->getUser()->getProfile());
         $privateMessage->setCreatedAt(new \DateTimeImmutable());
-
-        $assiocatedImages = $privateMessage->getAssociatedImages();
-
-        if ($assiocatedImages){
-            foreach ($imageProcessor->getImagesFromImagesIds($assiocatedImages) as $image){
-                $privateMessage->addImage($image);
-            }
-        }
 
         $manager->persist($privateMessage);
         $manager->flush();

@@ -14,20 +14,24 @@ class PrivateConversation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['privconv:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'privateCreatedConversations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['privconv:read'])]
     private ?Profile $creator = null;
 
     #[ORM\ManyToOne(inversedBy: 'privateMemberConversations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['privconv:read'])]
     private ?Profile $member = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\OneToMany(mappedBy: 'conversation', targetEntity: PrivateMessage::class)]
+    #[Groups(['privconv:read'])]
     private Collection $privateMessages;
 
     public function __construct()
@@ -39,6 +43,8 @@ class PrivateConversation
     {
         return $this->id;
     }
+
+
 
     public function getCreator(): ?Profile
     {

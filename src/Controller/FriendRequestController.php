@@ -13,18 +13,36 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FriendRequestController extends AbstractController
 {
+    #[Route('/api/friendrequests/sent', methods: ['GET'])]
+    public function listSent(FriendRequestRepository $repo)
+    {
+        $friendRequests = $this->getUser()->getProfile()->getSentFriendRequests();
+        return $this->json($friendRequests, 200, [], ['groups'=>'friendrequest:sent']);
+    }
+
+    #[Route('/api/friendrequests/received', methods: ['GET'])]
+    public function listReceived(FriendRequestRepository $repo)
+    {
+        $friendRequests = $this->getUser()->getProfile()->getReceivedFriendRequests();
+        return $this->json($friendRequests, 200, [], ['groups'=>'friendrequest:received']);
+    }
+
     #[Route('/api/friendrequest/send/{id}', methods: ['POST'])]
     public function send($id, ProfileRepository $repo, EntityManagerInterface $manager) : Response
     {
+
         $sender = $this->getUser()->getProfile();
         $recipient = $repo->find($id);
         $request = new FriendRequest();
         $request->setFromUser($sender);
         $request->setToUser($recipient);
         $request->setStatus(0);
+
+        $manager->persist($recipient);
+        $manager->persist($sender);
         $manager->persist($request);
         $manager->flush();
-        return $this->json("Request sent", 201);
+        return $this->json("Request sent to ".$recipient->getOfUser()->getEmail(), 201);
     }
     #[Route('/api/friendrequest/accept/{id}', methods: ['POST'])]
     public function accept($id, FriendRequestRepository $repo, EntityManagerInterface $manager) : Response
@@ -35,8 +53,10 @@ class FriendRequestController extends AbstractController
         $relation = new Relation();
         $relation->setSender($sender);
         $relation->setRecipient($recipient);
-        $request->setStatus(1);
-        $manager->persist($request);
+
+        $manager->remove($request);
+        $manager->persist($sender);
+        $manager->persist($recipient);
         $manager->persist($relation);
         $manager->flush();
         return $this->json("Friend add",200);
@@ -45,17 +65,14 @@ class FriendRequestController extends AbstractController
     public function deny($id, FriendRequestRepository $repo, EntityManagerInterface $manager): Response
     {
         $request = $repo->find($id);
-        if ($request->getStatus() == 1){
-            return $this->json("this request was already accept");
+        if (!$request){
+            return $this->json("this request does not exists (already accepted or not sent)");
         }
-        $request->setStatus(2);
         $sender = $request->getFromUser();
-        $sender->removeSentFriendRequest($request);
         $recipient = $request->getToUser();
-        $recipient->removeReceivedFriendRequest($request);
+        $manager->remove($request);
         $manager->persist($sender);
         $manager->persist($recipient);
-        $manager->persist($request);
         $manager->flush();
         return $this->json("Request denied", 200);
     }

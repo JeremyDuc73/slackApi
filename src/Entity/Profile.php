@@ -14,7 +14,7 @@ class Profile
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read'])]
+    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read', 'profile:read-all'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -27,13 +27,13 @@ class Profile
 
     #[ORM\OneToOne(inversedBy: 'profile', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read'])]
+    #[Groups(['friends:read', 'groupmessage:read-one', 'groupmessage:read-all', 'privmessage:read', 'profile:read-all', 'friendrequest:sent', 'friendrequest:received', 'privconv:read'])]
     private ?User $ofUser = null;
 
-    #[ORM\OneToMany(mappedBy: 'toUser', targetEntity: FriendRequest::class)]
+    #[ORM\OneToMany(mappedBy: 'fromUser', targetEntity: FriendRequest::class)]
     private Collection $sentFriendRequests;
 
-    #[ORM\OneToMany(mappedBy: 'fromUser', targetEntity: FriendRequest::class)]
+    #[ORM\OneToMany(mappedBy: 'toUser', targetEntity: FriendRequest::class)]
     private Collection $receivedFriendRequests;
 
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Relation::class)]
@@ -238,6 +238,20 @@ class Profile
         }
 
         return $this;
+    }
+    public function getPrivConvs()
+    {
+        $convList = [];
+        foreach ($this->privateCreatedConversations as $conversation)
+        {
+            $convList[] = $conversation;
+        }
+        foreach ($this->privateMemberConversations as $conversation)
+        {
+            $convList[] = $conversation;
+        }
+
+        return $convList;
     }
 
 

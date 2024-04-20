@@ -39,7 +39,7 @@ class RegistrationController extends AbstractController
             $user->setProfile($profile);
             $entityManager->persist($user);
             $entityManager->flush();
-            return $this->json("account created", 200, [], ['groups'=>'user:read']);
+            return $this->json($user, 200, [], ['groups'=>'user:read']);
         }else{
             return $this->json("email already used", 401);
         }
